@@ -12,6 +12,7 @@ app.config.from_object(Configuration)
 db = SQLAlchemy(app)
 
 from models import Book
+
 admin = Admin(app)
 admin.add_view(ModelView(Book, db.session))
 
