@@ -66,7 +66,11 @@ def create_book():
             for error in result_of_validation.errors.items():
                 raise ValidationError(error[0][0] + " : " + error[1][0])
 
-        new_post = Book(name=data['name'], description=data['description'], price=data['price'])
+        new_post = Book(
+            name=result_of_validation.data['name'],
+            description=result_of_validation.data['description'],
+            price=result_of_validation.data['price']
+        )
         db.session.add(new_post)
         db.session.commit()
 
@@ -97,7 +101,7 @@ def update(book_id):
              for error in result_of_validation.errors.items():
                  raise ValidationError(error[0][0] + " : " + error[1][0])
          try:
-            Book.query.filter_by(id=book_id).update(data)
+            Book.query.filter_by(id=book_id).update(result_of_validation.data)
             db.session.commit()
          except:
              abort(404)
