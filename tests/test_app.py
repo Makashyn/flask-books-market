@@ -71,3 +71,4 @@ def test_update_book_item(test_client):
 def test_delete(test_client):
     response = test_client.delete('/api/books/delete/6')
     assert response.status_code == 200
+
