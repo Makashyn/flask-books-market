@@ -1,7 +1,7 @@
 from app import app, db
 from flask import request
 from flask import jsonify, abort
-
+import json
 from models import Book
 
 from validation_schemas import BookSchema
@@ -25,24 +25,24 @@ def book_list():
 @app.route("/api/books/create", methods=['POST'])
 def create_book():
 
-    try:
-        data = request.json()
-    except:
+    data = request.json
+    if data:
+        schema = BookSchema()
+        result_of_validation = schema.load(data)
+        if result_of_validation.errors:
+            for error in result_of_validation.errors.items():
+                raise ValidationError(error[0][0] + " : " + error[1][0])
+
+        new_post = Book(
+            name=result_of_validation.data['name'],
+            description=result_of_validation.data['description'],
+            price=result_of_validation.data['price']
+        )
+        db.session.add(new_post)
+        db.session.commit()
+        return 'Success'
+    else:
         abort(404)
-    schema = BookSchema()
-    result_of_validation = schema.load(data)
-    if result_of_validation.errors:
-        for error in result_of_validation.errors.items():
-            raise ValidationError(error[0][0] + " : " + error[1][0])
-
-    new_post = Book(
-        name=result_of_validation.data['name'],
-        description=result_of_validation.data['description'],
-        price=result_of_validation.data['price']
-    )
-    db.session.add(new_post)
-    db.session.commit()
-
 
 @app.route("/api/books/<book_id>", methods=['GET'])
 def book_item(book_id):
@@ -59,7 +59,7 @@ def book_item(book_id):
 @app.route("/api/books/<book_id>", methods=['PUT'])
 def update_book_item(book_id):
     queryset = Book.query.filter_by(id=book_id).first_or_404()
-    data = request.json()
+    data = request.json
     not_updated_obj = {
         'name': queryset.name,
         'description': queryset.description,
@@ -75,11 +75,12 @@ def update_book_item(book_id):
     try:
         Book.query.filter_by(id=book_id).update(result_of_validation.data)
         db.session.commit()
+        return 'Success'
     except:
         abort(404)
 
-@app.route("/api/delete/<book_id>", methods=['DELETE'])
+@app.route("/api/books/delete/<book_id>", methods=['DELETE'])
 def delete(book_id):
     queryset = Book.query.filter_by(id=book_id).delete()
     db.session.commit()
-    abort(201)
+    return "Success"

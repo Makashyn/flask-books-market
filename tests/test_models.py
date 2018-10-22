@@ -1,8 +1,10 @@
-from app import db
-from models import Book
 
 import pytest
 
+import sys
+sys.path.append('../src')
+
+from models import Book
 
 
 @pytest.fixture(scope='module')
